@@ -35,8 +35,12 @@ BODY
 (( literal
 
 A'aesthetic'
+`normal chars`
 
 ^sad$
+
+c(w*) // w* - some chars go in the middle, some go in the right
+c()
 
 eo eye open
 ec eye closed
