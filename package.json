@@ -1,0 +1,7 @@
+{
+    "scripts": {},
+    "devDependencies": {},
+    "dependencies": {
+        "arcsecond": "^2.0.3"
+    }
+}
