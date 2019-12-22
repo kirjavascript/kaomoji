@@ -4,12 +4,13 @@ const {
     digits,
     possibly,
     sequenceOf,
-    either,
     regex,
-    anyOfString,
+    anythingExcept,
     many1,
+    many,
     choice,
     whitespace,
+    between,
 } = require('arcsecond');
 
 const asciiCode = choice([
@@ -46,21 +47,32 @@ const takeRand = (type, charset) => {
 const H = takeRand('H', hiragana);
 const K = takeRand('K', kanji);
 
-// K, count
+const text = between(char('`'))(char('`'))
+    (many(anythingExcept(char('`'))))
+    .map(arr => arr.join(''));
 
-// uuu
+const oneChar = sequenceOf([
+    char('.'),
+    regex(/^./),
+]).map(([_, c]) => c);
 
-// (*< )
+// c() - make generic
 
 const parser = many1(choice([
+
     H, K,
     asciiCode,
+    text,
+    oneChar,
     whitespace,
-])).map(arr => arr.join(''));
+]))
+    .map(arr => arr.join(''));
 
 // TODO collect everything after it stops parsing
 
 console.log(parser.run(`
+    \`asda\`
+    .@
     K2@x1f996 @97
 `))
 

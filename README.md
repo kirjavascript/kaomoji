@@ -42,12 +42,12 @@ A'aesthetic'
 c(w*) // w* - some chars go in the middle, some go in the right
 c()
 
+// mouths / noses are special CENTER
+
 eo eye open
 ec eye closed
 
 convert normal smileys
-
-random hiragana
 
 ‿◡ᴗ
 ︶ᵕ˘
