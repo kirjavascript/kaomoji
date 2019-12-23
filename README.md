@@ -26,9 +26,6 @@ qt
 MOOD
 ASD - sad, happy, cute
 
-EFFECTS
-3 / +++ intensity of things
-
 BODY
 (/* ) stars
 (~ ) 

@@ -1,3 +1,5 @@
+// © 2042 do not steal
+
 const {
     str,
     char,
@@ -13,6 +15,8 @@ const {
     between,
 } = require('arcsecond');
 
+// ascii
+
 const asciiCode = choice([
     sequenceOf([
         str('@x'),
@@ -23,6 +27,8 @@ const asciiCode = choice([
         digits,
     ]).map(([_, d]) => String.fromCodePoint(d)),
 ]);
+
+// japan
 
 const hiragana = Array.from({ length: 83 }, (_, i) => (
     String.fromCharCode(0x3041 + i)
@@ -47,19 +53,58 @@ const takeRand = (type, charset) => {
 const H = takeRand('H', hiragana);
 const K = takeRand('K', kanji);
 
-const text = between(char('`'))(char('`'))
-    (many(anythingExcept(char('`'))))
-    .map(arr => arr.join(''));
+// normal text
+
+const text = between(char('`'))(char('`')) (
+    many(choice([
+        str(`\\\``).map(() => '`'),
+        anythingExcept(char('`')),
+    ]))
+).map(arr => arr.join(''));
 
 const oneChar = sequenceOf([
     char('.'),
     regex(/^./),
 ]).map(([_, c]) => c);
 
+// kaotxt
+
 // c() - make generic
+// optional ^ and $ for non middle
+// <> direction
+// recursive
+
+// Ncount charset
+// overload * with multisets
+
+// text replacement
+
+const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789()';
+const aesthetic = 'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９';
+const sup = 'ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾQᴿˢᵀᵁⱽᵂˣʸᶻᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖqʳˢᵗᵘᵛʷˣʸᶻ⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾';
+
+const convertText = (name, charset) => {
+    return (
+        between(str(`${name}'`))(char(`'`)) (
+            many(choice([
+                str(`\\'`).map(() => `'`),
+                anythingExcept(char(`'`)),
+            ]))
+        ).map(str => (
+            [...str].map(ch => charset[normal.indexOf(ch)] || ch).join``
+        ))
+    );
+};
 
 const parser = many1(choice([
-
+    convertText('A', aesthetic),
+    convertText('sup', sup),
+    str(':shrug:').map(() => '¯\\_(ツ)_/¯'),
+    str('~`').map(() => '～́̀'),
+    char('~').map(() => '～'),
+    str('egg').map(()=> '🥚'),
+    char('D').map(() => ''+new Date),
+    str('<3').map(() => '❤'), // turn into Ncount
     H, K,
     asciiCode,
     text,
@@ -71,10 +116,15 @@ const parser = many1(choice([
 // TODO collect everything after it stops parsing
 
 console.log(parser.run(`
+    K2A'dino'@x1f996
+    sup'(owo)'
+    :shrug:
+    egg
+`).result)
+console.log(parser.run(`
     \`asda\`
+    ~~\`
     .@
-    K2@x1f996 @97
+    <3
+    @97
 `))
-
-// const cute = str('cute').map(() => '(◕‿◕✿)').run('cute')
-// console.log(cute);
