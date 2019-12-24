@@ -1,3 +1,4 @@
+[undocumented]() DSL for kaomoji and stuff
 
 ～
 
@@ -15,6 +16,8 @@
 (◔◡◔)⊃━☆ﾟ.*･｡
 
 const faces = [ '(◕ᴗ◕✿)', '(◕◡◕✿)', '(◔◡◔✿)', '(｡◕‿◕｡✿)', '(◡‿◡✿)', '(◠‿◠✿)', '(◕ܫ◕✿)', '(◕▿◕✿)', '(◕ ワ ◕✿)' ];
+
+(~˘▾˘)~
 
 // fliptext / s / m / f 
 // combine with xclip

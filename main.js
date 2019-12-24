@@ -15,6 +15,24 @@ const {
     between,
 } = require('arcsecond');
 
+const delim = (prefix, surround) => (
+    between(str(`${prefix}${surround}`))(char(surround)) (
+        many(choice([
+            str(`\\${surround}`).map(() => surround),
+            anythingExcept(char(surround)),
+        ]))
+    ).map(arr => arr.join``)
+);
+
+// normal text
+
+const text = delim('', '`');
+
+const oneChar = sequenceOf([
+    char('.'),
+    regex(/^./),
+]).map(([_, c]) => c);
+
 // ascii
 
 const asciiCode = choice([
@@ -53,26 +71,18 @@ const takeRand = (type, charset) => {
 const H = takeRand('H', hiragana);
 const K = takeRand('K', kanji);
 
-// normal text
+// kao
 
-const text = between(char('`'))(char('`')) (
-    many(choice([
-        str(`\\\``).map(() => '`'),
-        anythingExcept(char('`')),
-    ]))
-).map(arr => arr.join(''));
+const cute = between(str('c('))(char(')')) (
 
-const oneChar = sequenceOf([
-    char('.'),
-    regex(/^./),
-]).map(([_, c]) => c);
-
-// kaotxt
+);
+// chain
 
 // c() - make generic
 // optional ^ and $ for non middle
 // <> direction
 // recursive
+
 
 // Ncount charset
 // overload * with multisets
@@ -82,15 +92,11 @@ const oneChar = sequenceOf([
 const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789()';
 const aesthetic = 'ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ０１２３４５６７８９';
 const sup = 'ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾQᴿˢᵀᵁⱽᵂˣʸᶻᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖqʳˢᵗᵘᵛʷˣʸᶻ⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾';
+const v = '𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏';
 
 const convertText = (name, charset) => {
     return (
-        between(str(`${name}'`))(char(`'`)) (
-            many(choice([
-                str(`\\'`).map(() => `'`),
-                anythingExcept(char(`'`)),
-            ]))
-        ).map(str => (
+        delim(name, `'`).map(str => (
             [...str].map(ch => charset[normal.indexOf(ch)] || ch).join``
         ))
     );
@@ -99,6 +105,7 @@ const convertText = (name, charset) => {
 const parser = many1(choice([
     convertText('A', aesthetic),
     convertText('sup', sup),
+    convertText('v', v),
     str(':shrug:').map(() => '¯\\_(ツ)_/¯'),
     str('~`').map(() => '～́̀'),
     char('~').map(() => '～'),
