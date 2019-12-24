@@ -120,8 +120,6 @@ const parser = many1(choice([
 ]))
     .map(arr => arr.join(''));
 
-// TODO collect everything after it stops parsing
-
 console.log(parser.run(`
     K2A'dino'@x1f996
     sup'(owo)'
@@ -130,6 +128,8 @@ console.log(parser.run(`
 `).result)
 console.log(parser.run(`
     \`asda\`
+    \`\\\`\`
+    .\`
     ~~\`
     .@
     <3
