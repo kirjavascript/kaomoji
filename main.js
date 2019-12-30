@@ -46,15 +46,9 @@ const asciiCode = choice([
     ]).map(([_, d]) => String.fromCodePoint(d)),
 ]);
 
+const charset = (start, length) => Array.from({ length }, (_, i) => String.fromCodePoint(start + i));
+
 // japan
-
-const hiragana = Array.from({ length: 83 }, (_, i) => (
-    String.fromCharCode(0x3041 + i)
-));
-
-const kanji = Array.from({ length: 0x89A0 }, (_, i) => (
-    String.fromCharCode(0x4e00 + i)
-));
 
 const takeRand = (type, charset) => {
     return sequenceOf([
@@ -68,8 +62,8 @@ const takeRand = (type, charset) => {
         ));
 }
 
-const H = takeRand('H', hiragana);
-const K = takeRand('K', kanji);
+const H = takeRand('H', charset(0x3041, 83)); // hiragana
+const K = takeRand('K', charset(0x4e00, 0x89a0)); // kanji
 
 // kao
 
