@@ -20,7 +20,7 @@ const faces = [ '(◕ᴗ◕✿)', '(◕◡◕✿)', '(◔◡◔✿)', '(｡◕�
 (~˘▾˘)~
 
 // fliptext / s / m / f 
-// combine with xclip
+// combine with xclip OR clipboardy
 sparks
 wand
 (sad) // default = random
@@ -34,20 +34,11 @@ BODY
 (~ ) 
 (( literal
 
-A'aesthetic'
-`normal chars`
-
-^sad$
-
-c(w*) // w* - some chars go in the middle, some go in the right
-c()
-
-// mouths / noses are special CENTER
-
 eo eye open
 ec eye closed
 
 convert normal smileys
+
 
 ‿◡ᴗ
 ︶ᵕ˘
