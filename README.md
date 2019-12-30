@@ -26,9 +26,6 @@ wand
 (sad) // default = random
 qt
 
-MOOD
-ASD - sad, happy, cute
-
 BODY
 (/* ) stars
 (~ ) 
@@ -44,7 +41,7 @@ convert normal smileys
 ︶ᵕ˘
 ᵔ
 ﹏ω꒳ɜε３
-Ｏ〇
+°Ｏ〇
 〜～́̀
 ✯★✧
 ♪♬♫
