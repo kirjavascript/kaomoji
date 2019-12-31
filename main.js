@@ -104,6 +104,7 @@ const script = recursiveParser(() => possibly(many1(choice([
     // faces
     cute,
     sad,
+    cool,
     // charsets
     str('~`').map(() => '～́̀'),
     char('~').map(() => '～'),
@@ -140,6 +141,10 @@ const cute = face(anyOfString('cC')).map(({ name, left, center, right }) => {
 
 const sad = face(char('s')).map(({ center }) => {
     return `ʘ${center || '︵'}ʘ`;
+});
+
+const cool = face(str('cool')).map(({ left, center, right }) => {
+    return `(${or(left, '⌐')}■${center || '_'}■${or(right, '')})`;
 });
 
 // head.test(/^[A-Z]/)
