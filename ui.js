@@ -31,13 +31,11 @@ input.addEventListener('textChanged', (e) => {
     setTitle(parser(e));
 })
 
-input.addEventListener('returnPressed', (e) => {
-    clipboardy.writeSync(parser(input.text()));
+input.addEventListener('returnPressed', () => {
+    if (input.text()) {
+        clipboardy.writeSync(parser(input.text()));
+    }
     process.exit();
-})
-
-input.addEventListener('inputRejected', () => {
-    process.exit()
 })
 
 win.setCentralWidget(centralWidget);

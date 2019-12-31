@@ -103,6 +103,7 @@ const script = recursiveParser(() => possibly(many1(choice([
     fliptext, // f
     // faces
     cute,
+    sad,
     // charsets
     str('~`').map(() => '～́̀'),
     char('~').map(() => '～'),
@@ -123,22 +124,22 @@ const script = recursiveParser(() => possibly(many1(choice([
 const or = (obj, def) => (obj == null ? def : obj);
 
 const face = (ident) => sequenceOf([
-    ident,
-    char('('),
+    sequenceOf([ident, char('(')]).map(([ident]) => ident),
     possibly(sequenceOf([script, char('^')]).map(([str])=>str)),
     script,
     possibly(sequenceOf([char('$'), script]).map(([_, str])=>str)),
     char(')'),
-]);
+]).map(([name, left, center, right]) => ({
+    name, left, center, right,
+}));
 
-const cute = between(str('c('))(char(')')) (
-    sequenceOf([
-        possibly(sequenceOf([script, char('^')]).map(([str])=>str)),
-        script,
-        possibly(sequenceOf([char('$'), script]).map(([_, str])=>str)),
-    ])
-).map(([left, center, right]) => {
-    return `(${or(left, '')}◕${center || '◡'}◕${or(right, '✿')})`;
+const cute = face(anyOfString('cC')).map(({ name, left, center, right }) => {
+    const eye = name == 'C' ? '◔' : '◕';
+    return `(${or(left, '')}${eye}${center || '◡'}${eye}${or(right, '✿')})`;
+});
+
+const sad = face(char('s')).map(({ center }) => {
+    return `ʘ${center || '︵'}ʘ`;
 });
 
 // head.test(/^[A-Z]/)
@@ -175,11 +176,12 @@ module.exports = { parser };
 console.log(parser(`
     :shrug:
     f'Dangle'
-    c($) KK
+    s()
     c()
     c(s'w')
     c(.o)
     c() i'TODO: wand' <3
+    c($) KK
     c(.~^).~
     :egg:
 `))
