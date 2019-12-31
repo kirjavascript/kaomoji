@@ -1,10 +1,10 @@
-[undocumented](main.js) DSL for kaomoji and stuff
+[undocumented](main.js)
+
+![alt text](ui.png)
+
+TODO;
 
 ～
-
-🦖🦕
-
-
 (っ⌒‿⌒)っ~
 (✿◠‿◠)っ~
 ( ＾◡＾)っ~
@@ -16,14 +16,10 @@
 (◔◡◔)⊃━☆ﾟ.*･｡
 
 const faces = [ '(◕ᴗ◕✿)', '(◕◡◕✿)', '(◔◡◔✿)', '(｡◕‿◕｡✿)', '(◡‿◡✿)', '(◠‿◠✿)', '(◕ܫ◕✿)', '(◕▿◕✿)', '(◕ ワ ◕✿)' ];
-
 (~˘▾˘)~
-
-// fliptext / s / m / f 
-// combine with xclip OR clipboardy
 sparks
 wand
-(sad) // default = random
+(sad)
 qt
 
 BODY

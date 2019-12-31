@@ -97,9 +97,9 @@ const fliptext = delim('~', `'`).map(str => (
 
 const parser = recursiveParser(() => many1(choice([
     // text replacement
-    convertText('A', aesthetic),
-    convertText('S', sup),
-    convertText('I', italic),
+    convertText('a', aesthetic),
+    convertText('s', sup),
+    convertText('i', italic),
     fliptext, // ~
     // faces
     cute,
