@@ -145,27 +145,28 @@ const cute = between(str('c('))(char(')')) (
 
 const expr = many1(anyOfString(`0123456789+-/*xob^&|`)).map(eval);
 
+module.exports = { parser: (str) => parser.run(str).result };
 
-console.log(parser.run(`
-    :shrug:
-    ~'Dangle'
-    c()
-    c(S'w')
-    c(.o)
-    c($*)
-    c() I'TODO: wand' <3
-    c(.~^).~
-    egg
-`).result)
-console.log(parser.run(`
-    S'(owo)'
-    K2A'dino'@x1f996
-    egg
-    \`asda\`
-    \`\\\`\`
-    .\`
-    ~~\`
-    .@
-    <3
-    @97
-`).result)
+// console.log(parser.run(`
+//     :shrug:
+//     ~'Dangle'
+//     c()
+//     c(S'w')
+//     c(.o)
+//     c($*) KK
+//     c() I'TODO: wand' <3
+//     c(.~^).~
+//     egg
+// `).result)
+// console.log(parser.run(`
+//     S'(owo)'
+//     K2A'dino'@x1f996
+//     egg
+//     \`asda\`
+//     \`\\\`\`
+//     .\`
+//     ~~\`
+//     .@
+//     <3
+//     @97
+// `).result)

@@ -1,7 +1,12 @@
 {
-    "scripts": {},
+    "scripts": {
+        "start": "qode ./ui.js",
+        "debug": "qode --inspect ./ui.js"
+    },
     "devDependencies": {},
     "dependencies": {
-        "arcsecond": "^2.0.3"
+        "@nodegui/nodegui": "^0.12.1",
+        "arcsecond": "^2.0.3",
+        "clipboardy": "^2.1.0"
     }
 }
