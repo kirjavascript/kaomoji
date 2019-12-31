@@ -91,51 +91,71 @@ Object.entries(flipped).forEach(([k, v]) => {
     k in flipped || (flipped[k] = v);
 });
 
-const fliptext = delim('~', `'`).map(str => (
+const fliptext = delim('f', `'`).map(str => (
     [...str].reverse().map(ch => flipped[ch] || ch).join``
 ));
 
-const parser = recursiveParser(() => many1(choice([
+const script = recursiveParser(() => possibly(many1(choice([
     // text replacement
     convertText('a', aesthetic),
     convertText('s', sup),
     convertText('i', italic),
-    fliptext, // ~
+    fliptext, // f
     // faces
     cute,
     // charsets
     str('~`').map(() => '～́̀'),
     char('~').map(() => '～'),
-    char('*').map(() => '✿'),
     str('<3').map(() => '❤'), // turn into Ncount
     // misc
     str(':shrug:').map(() => '¯\\_(ツ)_/¯'),
-    str('egg').map(()=> '🥚'),
-    char('D').map(() => ''+new Date),
+    str(':lambda:').map(() => 'λ'),
+    str(':egg:').map(()=> '🥚'),
+    str('ZWJ').map(()=> String.fromCharCode(0x200b)),
     H, K,
     asciiCode,
     whitespace,
     text,
     oneChar,
-])))
-    .map(arr => arr.join(''));
+]))))
+    .map(arr => arr ? arr.join('') : '');
+
+const or = (obj, def) => (obj == null ? def : obj);
+
+const face = (ident) => sequenceOf([
+    ident,
+    char('('),
+    possibly(sequenceOf([script, char('^')]).map(([str])=>str)),
+    script,
+    possibly(sequenceOf([char('$'), script]).map(([_, str])=>str)),
+    char(')'),
+]);
 
 const cute = between(str('c('))(char(')')) (
     sequenceOf([
-        possibly(sequenceOf([parser, char('^')]).map(([str])=>str)),
-        possibly(parser),
-        possibly(sequenceOf([char('$'), parser]).map(([_, str])=>str)),
+        possibly(sequenceOf([script, char('^')]).map(([str])=>str)),
+        script,
+        possibly(sequenceOf([char('$'), script]).map(([_, str])=>str)),
     ])
 ).map(([left, center, right]) => {
-    return `(${left || ''}◕${center || '◡'}◕${right || ''})`;
+    return `(${or(left, '')}◕${center || '◡'}◕${or(right, '✿')})`;
 });
+
+// head.test(/^[A-Z]/)
+
+// extract body parser
+
+// capital - direction
 
 // c() - make generic
 // optional ^ and $ for non middle
 // default face
 // <> direction / arms
 // .o(..)
-// recursive
+//
+// cool
+// actually
+// sad
 
 // charmap / Ncount
 // 0 = normal
@@ -143,23 +163,29 @@ const cute = between(str('c('))(char(')')) (
 
 // expr
 
-const expr = many1(anyOfString(`0123456789+-/*xob^&|`)).map(eval);
+// const expr = many1(anyOfString(`0123456789+-/*xob^&|`)).map(eval);
 
-module.exports = { parser: (str) => parser.run(str).result };
+function parser(str) {
+    const { result, index } = script.run(str);
+    return str.length == index ? result : result + '// ' + str.slice(index);
+}
 
-// console.log(parser.run(`
-//     :shrug:
-//     ~'Dangle'
-//     c()
-//     c(S'w')
-//     c(.o)
-//     c($*) KK
-//     c() I'TODO: wand' <3
-//     c(.~^).~
-//     egg
-// `).result)
-// console.log(parser.run(`
-//     S'(owo)'
+module.exports = { parser };
+
+console.log(parser(`
+    :shrug:
+    f'Dangle'
+    c($) KK
+    c()
+    c(s'w')
+    c(.o)
+    c() i'TODO: wand' <3
+    c(.~^).~
+    :egg:
+`))
+
+// console.log(script.run(`
+//     s'(owo)'
 //     K2A'dino'@x1f996
 //     egg
 //     \`asda\`

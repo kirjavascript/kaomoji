@@ -11,7 +11,7 @@ const {
 
 const win = new QMainWindow();
 const setTitle = (str) => {
-    win.setWindowTitle('kaomoji' + (str ? ` - ${str}` : ''));
+    win.setWindowTitle('kaoscript' + (str ? ` - ${str}` : ''));
 };
 setTitle();
 win.setGeometry(0, 0, 400, 25);
@@ -34,6 +34,10 @@ input.addEventListener('textChanged', (e) => {
 input.addEventListener('returnPressed', (e) => {
     clipboardy.writeSync(parser(input.text()));
     process.exit();
+})
+
+input.addEventListener('inputRejected', () => {
+    process.exit()
 })
 
 win.setCentralWidget(centralWidget);
