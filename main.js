@@ -45,15 +45,6 @@ const asciiCode = choice([
     delim('', '`').map(ch => String.fromCodePoint(parseInt(ch || 0, 36))),
 ]);
 
-const charset = (start, length) => Array.from({ length }, (_, i) => String.fromCodePoint(start + i)).join``;
-
-// japan
-
-// const H = takeRand('H', charset(0x3041, 83)); // hiragana
-// const K = takeRand('K', charset(0x4e00, 0x89a0)); // kanji
-
-// TODO: map as text replacement
-
 // text replacement
 
 const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789()';
@@ -82,6 +73,8 @@ Object.entries(flipped).forEach(([k, v]) => {
 const fliptext = delim('f', `'`).map(str => (
     [...str].reverse().map(ch => flipped[ch] || ch).join``
 ));
+
+const charset = (start, length) => Array.from({ length }, (_, i) => String.fromCodePoint(start + i)).join``;
 
 // charmaps
 
@@ -115,17 +108,20 @@ const tilde = charmap('~', {
     qj λ
     2rtm 🥚
     2rva 🦖
+    2qlw 🌴
+    1e65 ﷽
 */
 
 const script = recursiveParser(() => possibly(many1(choice([
     // text replacement
     delim('t', "'"),
-    convertText('a', aesthetic),
-    convertText('s', sup),
     convertText('i', italic),
     convertText('bi', boldItalic),
+    convertText('s', sup),
     convertText('d', dia),
-    // hiragana
+    convertText('a', aesthetic),
+    convertText('h', charset(0x3041, 83)), // hiragana
+    convertText('k', charset(0x4e00, 0x89a0)), // kanji
     fliptext, // f
     // faces
     cute,
@@ -175,6 +171,9 @@ const ohno = face(str('ohno')).map(({ left, center, right }) => {
     return `\\(${or(left, '')}\`${center || '⌒'}´${or(right, 'メ')})ノ`;
 });
 
+// actually
+// lenny
+
 // map moods to keyboard keys
 // https://www.vaporwavetextgenerator.com/
 // https://beautifuldingbats.com/aesthetic-text-generator/
@@ -182,8 +181,6 @@ const ohno = face(str('ohno')).map(({ left, center, right }) => {
 
 // <> direction / arms
 // .o(..)
-//
-// actually
 
 // expr
 
