@@ -67,7 +67,6 @@ const takeRand = (type, charset) => {
 const H = takeRand('H', charset(0x3041, 83)); // hiragana
 const K = takeRand('K', charset(0x4e00, 0x89a0)); // kanji
 
-
 // text replacement
 
 const normal = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789()';
@@ -95,6 +94,32 @@ const fliptext = delim('f', `'`).map(str => (
     [...str].reverse().map(ch => flipped[ch] || ch).join``
 ));
 
+// charmaps
+
+const charmap = (trigger, lookup, _default = trigger) => (
+    sequenceOf([
+        str(trigger),
+        possibly(choice(Object.keys(lookup).map(str))),
+    ]).map(([_, key]) => key ? lookup[key] : _default)
+);
+
+const star = charmap('*', {
+    '!': '🎉',
+    '***': '✴',
+    '**': '✯',
+    '*': '★',
+    '+': '✧',
+});
+
+const heart = charmap('<3', {
+    '!': 'S',
+}, '❤');
+
+const tilde = charmap('~', {
+    '~': '～',
+    '`': '～́̀',
+});
+
 const script = recursiveParser(() => possibly(many1(choice([
     // text replacement
     convertText('a', aesthetic),
@@ -105,15 +130,18 @@ const script = recursiveParser(() => possibly(many1(choice([
     cute,
     sad,
     cool,
+    ohno,
     // charsets
-    str('~`').map(() => '～́̀'),
-    char('~').map(() => '～'),
-    str('<3').map(() => '❤'), // turn into Ncount
+    star,
+    heart,
+    tilde,
     // misc
     str(':shrug:').map(() => '¯\\_(ツ)_/¯'),
     str(':lambda:').map(() => 'λ'),
+    str(':party:').map(()=> '🎉'),
     str(':egg:').map(()=> '🥚'),
     str('ZWJ').map(()=> String.fromCharCode(0x200b)),
+    str('BELL').map(()=> String.fromCharCode(0x7)),
     H, K,
     asciiCode,
     whitespace,
@@ -147,25 +175,19 @@ const cool = face(str('cool')).map(({ left, center, right }) => {
     return `(${or(left, '⌐')}■${center || '_'}■${or(right, '')})`;
 });
 
-// head.test(/^[A-Z]/)
+const ohno = face(str('ohno')).map(({ left, center, right }) => {
+    return `\\(${or(left, '')}\`${center || '⌒'}´${or(right, 'メ')})ノ`;
+});
 
-// extract body parser
+// map moods to keyboard keys
+//https://www.vaporwavetextgenerator.com/
+//https://beautifuldingbats.com/aesthetic-text-generator/
+// http://kaomoji.ru/en/
 
-// capital - direction
-
-// c() - make generic
-// optional ^ and $ for non middle
-// default face
 // <> direction / arms
 // .o(..)
 //
-// cool
 // actually
-// sad
-
-// charmap / Ncount
-// 0 = normal
-// overload * with multisets
 
 // expr
 
@@ -179,6 +201,7 @@ function parser(str) {
 module.exports = { parser };
 
 console.log(parser(`
+    *
     :shrug:
     f'Dangle'
     s()
@@ -222,19 +245,9 @@ const faces = [ '(◕ᴗ◕✿)', '(◕◡◕✿)', '(◔◡◔✿)', '(｡◕�
 (~˘▾˘)~
 sparks
 wand
-(sad)
 qt
 
-BODY
-(/* ) stars
-(~ )
-(( literal
-
-eo eye open
-ec eye closed
-
 convert normal smileys
-
 
 ‿◡ᴗ
 ︶ᵕ˘
@@ -242,12 +255,11 @@ convert normal smileys
 ﹏ω꒳ɜε３
 °Ｏ〇
 〜～́̀
-✯★✧
 ♪♬♫
 ❤
 ✿
 ￣¯
 ⁽⁾
-^´Y∀▽*٩◕‿｡۶☆≧≦⌒<>。･―ヽ・ﾉ•゛°＠＾_彡人ﾟ∑╰▔╯─＼／⁽⁾ノっς/ヮ〃❛‾๑˃˂ﻭ˙꒦ິີ˖◝⁰▿◜„֊⁀ᗢ￢¬♡зμ､○ღ⌣ｏ³ԅσ⇀3↼ЗɔˆΣ→ゞ⁄ಡงืวヾДρ、ゝ~；ーд╥＞＜#＃|□」ｍロ＿︹︺ヘ﹌︿凸ツ‸‶ᗒᗣᗕ՞눈Uメ╬ψ皿益△∇ﾞ‵ﾒﾛ┌∩┐◣◢▼ㅂへ҂‡ʘÒÓಠ↑ΦΨ←ｰ∈୧୨ఠಥТ゜︵，个ˍつ̩╭╮〒×＋[±]ཀ∠シ″︴{}º〣Δ▓▒░ˇ‘　ᕕᐛᕗ?ิ◎ლ٥⊙౦０づ⊃ʖ⊂≡∂−ﾊ་།¨ﾍ┬┴┤├͜͡φ．〆=ミﾐ┘Z－∪ｪ①‥ฅㅅ❀ɪଲⓛᴥ˵◔ตｴʕʔˋェＵＴ●ᆺоΘθ◉◇ζ╱╲ರ⌓༼ل͟༽ᴼ౪☉八爻☞☜口︻デ═一…Qو三ڡ✴｢ð┻┳━∞占く¤✿ᄑ炎旦且♨二ｃ└√¸⌐■乁✺◟◞◖◗⊥Ю̯͠≖༎ຶٹˊ尸̲̅$﹃【】☂✂⋃фଘ੭ੈ✩‧₊˚
+^´Y∀▽*٩◕‿｡۶☆≧≦⌒<>。･―ヽ・ﾉ•゛°＠＾_彡人ﾟ∑╰▔╯─＼／⁽⁾ノっς/ヮ〃❛‾๑˃˂ﻭ˙꒦ິີ˖◝⁰▿◜„֊⁀ᗢ￢¬♡зμ､○ღ⌣ｏ³ԅσ⇀3↼ЗɔˆΣ→ゞ⁄ಡงืวヾДρ、ゝ~；ーд╥＞＜#＃|□」ｍロ＿︹︺ヘ﹌︿凸ツ‸‶ᗒᗣᗕ՞눈Uメ╬ψ皿益△∇ﾞ‵ﾒﾛ┌∩┐◣◢▼ㅂへ҂‡ʘÒÓಠ↑ΦΨ←ｰ∈୧୨ఠಥТ゜︵，个ˍつ̩╭╮〒×＋[±]ཀ∠シ″︴{}º〣Δ▓▒░ˇ‘　ᕕᐛᕗ?ิ◎ლ٥⊙౦０づ⊃ʖ⊂≡∂−ﾊ་།¨ﾍ┬┴┤├͜͡φ．〆=ミﾐ┘Z－∪ｪ①‥ฅㅅ❀ɪଲⓛᴥ˵◔ตｴʕʔˋェＵＴ●ᆺоΘθ◉◇ζ╱╲ರ⌓༼ل͟༽ᴼ౪☉八爻☞☜口︻デ═一…Qو三ڡ｢ð┻┳━∞占く¤✿ᄑ炎旦且♨二ｃ└√¸⌐■乁✺◟◞◖◗⊥Ю̯͠≖༎ຶٹˊ尸̲̅$﹃【】☂✂⋃фଘ੭ੈ✩‧₊˚
 
 */
