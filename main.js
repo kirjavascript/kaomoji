@@ -26,15 +26,6 @@ const delim = (prefix, surround) => (
     ).map(arr => arr.join``)
 );
 
-// normal text
-
-const text = delim('', '`');
-
-const oneChar = sequenceOf([
-    char('.'),
-    regex(/^./),
-]).map(([_, c]) => c);
-
 // ascii
 
 const asciiCode = choice([
@@ -46,29 +37,22 @@ const asciiCode = choice([
         char('@'),
         digits,
     ]).map(([_, d]) => String.fromCodePoint(d)),
-    delim('@p', "'").map(ch => ch.codePointAt(0).toString(36)),
-    delim('@', "'").map(ch => String.fromCodePoint(parseInt(ch, 36))),
+    delim('@', "'").map(ch => {
+        if (!ch) return '✖';
+        const code = ch.codePointAt(0);
+        return `${code}-0x${code.toString(16)}-${code.toString(36)}`;
+    }),
+    delim('', '`').map(ch => String.fromCodePoint(parseInt(ch || 0, 36))),
 ]);
-// 🦖
 
 const charset = (start, length) => Array.from({ length }, (_, i) => String.fromCodePoint(start + i)).join``;
 
 // japan
 
-const takeRand = (type, charset) => {
-    return sequenceOf([
-        char(type),
-        possibly(digits),
-    ])
-        .map(([_, n]) => (
-            Array.from({ length: +n || 1 }, () => (
-                charset[0|Math.random()*charset.length]
-            )).join('')
-        ));
-}
+// const H = takeRand('H', charset(0x3041, 83)); // hiragana
+// const K = takeRand('K', charset(0x4e00, 0x89a0)); // kanji
 
-const H = takeRand('H', charset(0x3041, 83)); // hiragana
-const K = takeRand('K', charset(0x4e00, 0x89a0)); // kanji
+// TODO: map as text replacement
 
 // text replacement
 
@@ -127,13 +111,21 @@ const tilde = charmap('~', {
     '`': '～́̀',
 });
 
+/*
+    qj λ
+    2rtm 🥚
+    2rva 🦖
+*/
+
 const script = recursiveParser(() => possibly(many1(choice([
     // text replacement
+    delim('t', "'"),
     convertText('a', aesthetic),
     convertText('s', sup),
     convertText('i', italic),
     convertText('bi', boldItalic),
     convertText('d', dia),
+    // hiragana
     fliptext, // f
     // faces
     cute,
@@ -146,16 +138,11 @@ const script = recursiveParser(() => possibly(many1(choice([
     tilde,
     // misc
     str(':shrug:').map(() => '¯\\_(ツ)_/¯'),
-    str(':lambda:').map(() => 'λ'),
-    str(':party:').map(()=> '🎉'),
-    str(':egg:').map(()=> '🥚'),
     str('ZWJ').map(()=> String.fromCharCode(0x200b)),
     str('BELL').map(()=> String.fromCharCode(0x7)),
-    H, K,
     asciiCode,
     whitespace,
-    text,
-    oneChar,
+    sequenceOf([ char('.'), regex(/^./) ]).map(([_, c]) => c), // oneChar
 ]))))
     .map(arr => arr ? arr.join('') : '');
 
