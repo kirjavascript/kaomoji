@@ -76,6 +76,18 @@ const fliptext = delim('f', `'`).map(str => (
 
 const charset = (start, length) => Array.from({ length }, (_, i) => String.fromCodePoint(start + i)).join``;
 
+const textReplacement = choice([
+    delim('t', "'"), // none
+    convertText('i', italic),
+    convertText('bi', boldItalic),
+    convertText('s', sup),
+    convertText('d', dia),
+    convertText('a', aesthetic),
+    convertText('h', charset(0x3041, 83)), // hiragana
+    convertText('k', charset(0x4e00, 0x89a0)), // kanji
+    fliptext, // f
+]);
+
 // charmaps
 
 const charmap = (trigger, lookup, _default = trigger) => (
@@ -104,87 +116,101 @@ const tilde = charmap('~', {
     '`': '～́̀',
 });
 
-/*
-    qj λ
-    2rtm 🥚
-    2rva 🦖
-    2qlw 🌴
-    1e65 ﷽
-*/
+const emotes = charmap(':', {
+    ')': 'ツ',
+});
 
 const script = recursiveParser(() => possibly(many1(choice([
-    // text replacement
-    delim('t', "'"),
-    convertText('i', italic),
-    convertText('bi', boldItalic),
-    convertText('s', sup),
-    convertText('d', dia),
-    convertText('a', aesthetic),
-    convertText('h', charset(0x3041, 83)), // hiragana
-    convertText('k', charset(0x4e00, 0x89a0)), // kanji
-    fliptext, // f
-    // faces
-    cute,
-    sad,
-    cool,
-    ohno,
+    textReplacement,
+    faces,
     // charsets
     star,
     heart,
     tilde,
+    emotes,
     // misc
-    str(':shrug:').map(() => '¯\\_(ツ)_/¯'),
-    str('ZWJ').map(()=> String.fromCharCode(0x200b)),
-    str('BELL').map(()=> String.fromCharCode(0x7)),
     asciiCode,
     whitespace,
     sequenceOf([ char('.'), regex(/^./) ]).map(([_, c]) => c), // oneChar
+    str('ZWJ').map(()=> String.fromCharCode(0x200b)),
+    str('BELL').map(()=> String.fromCharCode(0x7)),
 ]))))
     .map(arr => arr ? arr.join('') : '');
 
-const or = (obj, def) => (obj == null ? def : obj);
-
-const face = (ident) => sequenceOf([
+const face = (ident) => (fn) => sequenceOf([
     sequenceOf([ident, char('(')]).map(([ident]) => ident),
     possibly(sequenceOf([script, char('^')]).map(([str])=>str)),
     script,
     possibly(sequenceOf([char('$'), script]).map(([_, str])=>str)),
     char(')'),
-]).map(([name, left, center, right]) => ({
-    name, left, center, right,
-}));
-
-const cute = face(anyOfString('cC')).map(({ name, left, center, right }) => {
-    const eye = name == 'C' ? '◔' : '◕';
-    return `(${or(left, '')}${eye}${center || '◡'}${eye}${or(right, '✿')})`;
+]).map(([name, left, center, right]) => {
+    const face = fn({
+        name,
+        left: (def) => left == null ? def : left,
+        center: (def) => center || def,
+        right: (def) => right == null ? def : right,
+        wrap: (str) => `(${str.join``})`
+    })
+    return Array.isArray(face) ? face.join`` : face;
 });
 
-const sad = face(char('s')).map(({ center }) => {
-    return `ʘ${center || '︵'}ʘ`;
+const cute = face(anyOfString('cC'))(({ name, left, right, center, wrap }) => {
+    const eye = /[A-Z]/.test(name) ? '◔' : '◕';
+    return wrap([left(), eye, center('◡'), eye, right('✿')]);
 });
 
-const cool = face(str('cool')).map(({ left, center, right }) => {
-    return `(${or(left, '⌐')}■${center || '_'}■${or(right, '')})`;
+
+const sad = face(char('q'))(({ center }) => {
+    return [`ʘ`, center('︵'), `ʘ`];
 });
 
-const ohno = face(str('ohno')).map(({ left, center, right }) => {
-    return `\\(${or(left, '')}\`${center || '⌒'}´${or(right, 'メ')})ノ`;
+const cool = face(char('a'))(({ left, center, right, wrap }) => {
+    return wrap([left('⌐'), '■', center('_'), '■', right()]);
 });
 
-// actually
-// lenny
+const shrug = face(char('s'))(({ left, center, right, wrap }) => {
+    return [`¯\\_`, wrap([left(''), center('ツ'), right()]), '_/¯'];
+});
 
-// map moods to keyboard keys
-// https://www.vaporwavetextgenerator.com/
-// https://beautifuldingbats.com/aesthetic-text-generator/
-// http://kaomoji.ru/en/
+const lenny = face(char('m'))(({ left, center, right, wrap }) => {
+    return wrap([left(), ' ͡°', center(' ͜ʖ'), ' ͡°', right()]);
+});
+
+const actually = face(char('x'))(({ left, center, right, wrap }) => {
+    return [wrap([left(), '~˘', center('▾'), '˘', right()]), '~'];
+});
+
+const flip = face(char('p'))(({ left, center, right, wrap }) => {
+    return [wrap([left(), '╯°', center('□'), '°', right()]), ' ╯︵ ┻━┻'];
+});
+
+//     // ヘ（°□。）ヘ   ヘ（。□°）ヘ
+
+const faces = choice([
+    sad,
+    lenny,
+    shrug,
+    cool,
+    actually,
+    cute,
+    flip,
+]);
+
+/*
+    Mood keymap
+    Negative - Angry
+    Neutral - Chaotic
+    Positive - Aroused
+
+*/
 
 // <> direction / arms
 // .o(..)
 
-// expr
+// https://www.vaporwavetextgenerator.com/
+// https://beautifuldingbats.com/aesthetic-text-generator/
+// http://kaomoji.ru/en/
 
-// const expr = many1(anyOfString(`0123456789+-/*xob^&|`)).map(eval);
 
 function parser(str) {
     const { result, index } = script.run(str);
@@ -193,8 +219,19 @@ function parser(str) {
 
 module.exports = { parser };
 
+
+/*
+    qj λ
+    2rtm 🥚
+    2rva 🦖
+    2qlw 🌴
+    1e65 ﷽
+*/
+
 console.log(parser(`
     *
+    f()
+    m(.-)
     :shrug:
     f'Dangle'
     s()
