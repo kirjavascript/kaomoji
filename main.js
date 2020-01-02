@@ -141,61 +141,68 @@ const script = recursiveParser(() => possibly(many1(choice([
 const face = (ident) => (fn) => sequenceOf([
     sequenceOf([
         ident,
-        many(anyOfString('*"')),
+        many(anyOfString('!"£*')),
         char('('),
     ]),
     possibly(sequenceOf([script, char('^')]).map(([str])=>str)),
     script,
     possibly(sequenceOf([char('$'), script]).map(([_, str])=>str)),
+    possibly(sequenceOf([char('?'), script]).map(([_, str])=>str)),
     char(')'),
-]).map(([[name, mods], left, center, right]) => {
-    const hideWrap = mods.includes('*');
+]).map(([[name, mods], left, center, right, optional ]) => {
+    const pound = mods.includes('£');
+    const hideWrap = mods.includes('*') || pound;
     const hideArms = mods.includes('"');
+    const hideFace = (str) => (mods.includes('!') || pound) ? '' : str;
     const face = fn({
         name,
-        left: (def) => left == null ? def : left,
-        center: (def) => center || def,
-        right: (def) => right == null ? def : right,
-        wrap: (str) => hideWrap ? str.join`` : `(${str.join``})`,
+        left: (def) => left == null ? hideFace(def) : left,
+        eye: (str) => hideFace(str),
+        center: (def) => center || hideFace(def),
+        right: (def) => right == null ? hideFace(def) : right,
         arm: (str) => hideArms ? '' : str,
-        obj: (str) => str,
+        wrap: (str) => hideWrap ? str.join`` : `(${str.join``})`,
+        obj: (str) => optional == null ? str : optional,
     })
     return Array.isArray(face) ? face.join`` : face;
 });
 
-const cute = face(anyOfString('cC'))(({ name, left, right, center, wrap }) => {
-    const eye = /[A-Z]/.test(name) ? '◔' : '◕';
-    return wrap([left(), eye, center('◡'), eye, right('✿')]);
+const cute = face(anyOfString('cC'))(({ name, left, right, center, wrap, eye }) => {
+    const direction = /[A-Z]/.test(name);
+    const eye_ = eye(direction ? '◔' : '◕');
+    const left_ = direction ? '✿' : undefined;
+    const right_ = direction ? undefined : '✿';
+    return wrap([left(left_), eye_, center('◡'), eye_, right(right_)]);
 });
 
-const cool = face(char('x'))(({ left, center, right, wrap }) => {
-    return wrap([left('⌐'), '■', center('_'), '■', right()]);
+const cool = face(char('x'))(({ left, center, right, wrap, eye }) => {
+    return wrap([left('⌐'), eye('■'), center('_'), eye('■'), right()]);
 });
 
-const sad = face(char('a'))(({ center }) => {
-    return [`ʘ`, center('︵'), `ʘ`];
+const sad = face(char('a'))(({ center, eye }) => {
+    return [eye(`ʘ`), center('︵'), eye(`ʘ`)];
 });
 
-const lod = face(char('d'))(({ center }) => {
-    return [`ಠ`, center('_'), `ಠ`];
+const lod = face(char('d'))(({ center, eye }) => {
+    return [eye(`ಠ`), center('_'), eye(`ಠ`)];
 });
 
-const actually = face(char('z'))(({ left, center, right, wrap, arm }) => {
-    return [wrap([left(arm('~')), '˘', center('▾'), '˘', right()]), arm('~')];
+const actually = face(char('z'))(({ left, center, right, wrap, arm, eye }) => {
+    return [wrap([left(arm('~')), eye('˘'), center('▾'), eye('˘'), right()]), arm('~')];
 });
 
 const shrug = face(char('s'))(({ left, center, right, wrap, arm }) => {
     return [arm(`¯\\_`), wrap([left(), center('ツ'), right()]), arm('_/¯')];
 });
 
-const lenny = face(char('v'))(({ left, center, right, wrap }) => {
-    return wrap([left(), ' ͡°', center(' ͜ʖ'), ' ͡°', right()]);
+const lenny = face(char('v'))(({ left, center, right, wrap, eye }) => {
+    return wrap([left(), eye(' ͡°'), center(' ͜ʖ'), eye(' ͡°'), right()]);
 });
 
 
-const flip = face(char('f'))(({ left, center, right, wrap, obj, arm }) => {
+const flip = face(char('f'))(({ left, center, right, wrap, obj, arm, eye }) => {
     return [wrap([
-        left(arm('╯')), '°', center('□'), '°', right()
+        left(arm('╯')), eye('°'), center('□'), eye('°'), right()
     ]), arm(' ╯'), '︵ ', obj('┻━┻')];
 });
 
@@ -243,18 +250,22 @@ console.log(parser(`
     a() s() d() f()
     z() x() c() v()
 
-    v(.-)
     c($<3)
+
+    z"()
+    v(.-)
     v()*** *!
 
     h'hs' a'vaportext' ~~ \`2qlw\`
 
     s(a*())
 
+    f£(C())
+
+    f!(d()?f'Dangle')
+
     c(s'w')
     c(.o$) **
-
-    f'Dangle'
 `))
 
 /*
