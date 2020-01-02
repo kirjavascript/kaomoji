@@ -103,6 +103,7 @@ const star = charmap('*', {
     '"': '✴',
     '£': '✯',
     '*': '★',
+    '$': '✿',
     '+': '✧',
 });
 
@@ -138,18 +139,26 @@ const script = recursiveParser(() => possibly(many1(choice([
     .map(arr => arr ? arr.join('') : '');
 
 const face = (ident) => (fn) => sequenceOf([
-    sequenceOf([ident, char('(')]).map(([ident]) => ident),
+    sequenceOf([
+        ident,
+        many(anyOfString('*"')),
+        char('('),
+    ]),
     possibly(sequenceOf([script, char('^')]).map(([str])=>str)),
     script,
     possibly(sequenceOf([char('$'), script]).map(([_, str])=>str)),
     char(')'),
-]).map(([name, left, center, right]) => {
+]).map(([[name, mods], left, center, right]) => {
+    const hideWrap = mods.includes('*');
+    const hideArms = mods.includes('"');
     const face = fn({
         name,
         left: (def) => left == null ? def : left,
         center: (def) => center || def,
         right: (def) => right == null ? def : right,
-        wrap: (str) => `(${str.join``})`
+        wrap: (str) => hideWrap ? str.join`` : `(${str.join``})`,
+        arm: (str) => hideArms ? '' : str,
+        obj: (str) => str,
     })
     return Array.isArray(face) ? face.join`` : face;
 });
@@ -159,35 +168,44 @@ const cute = face(anyOfString('cC'))(({ name, left, right, center, wrap }) => {
     return wrap([left(), eye, center('◡'), eye, right('✿')]);
 });
 
-
-const sad = face(char('q'))(({ center }) => {
-    return [`ʘ`, center('︵'), `ʘ`];
-});
-
-const cool = face(char('a'))(({ left, center, right, wrap }) => {
+const cool = face(char('x'))(({ left, center, right, wrap }) => {
     return wrap([left('⌐'), '■', center('_'), '■', right()]);
 });
 
-const shrug = face(char('s'))(({ left, center, right, wrap }) => {
-    return [`¯\\_`, wrap([left(''), center('ツ'), right()]), '_/¯'];
+const sad = face(char('a'))(({ center }) => {
+    return [`ʘ`, center('︵'), `ʘ`];
 });
 
-const lenny = face(char('m'))(({ left, center, right, wrap }) => {
+const lod = face(char('d'))(({ center }) => {
+    return [`ಠ`, center('_'), `ಠ`];
+});
+
+const actually = face(char('z'))(({ left, center, right, wrap, arm }) => {
+    return [wrap([left(arm('~')), '˘', center('▾'), '˘', right()]), arm('~')];
+});
+
+const shrug = face(char('s'))(({ left, center, right, wrap, arm }) => {
+    return [arm(`¯\\_`), wrap([left(), center('ツ'), right()]), arm('_/¯')];
+});
+
+const lenny = face(char('v'))(({ left, center, right, wrap }) => {
     return wrap([left(), ' ͡°', center(' ͜ʖ'), ' ͡°', right()]);
 });
 
-const actually = face(char('x'))(({ left, center, right, wrap }) => {
-    return [wrap([left(), '~˘', center('▾'), '˘', right()]), '~'];
+
+const flip = face(char('f'))(({ left, center, right, wrap, obj, arm }) => {
+    return [wrap([
+        left(arm('╯')), '°', center('□'), '°', right()
+    ]), arm(' ╯'), '︵ ', obj('┻━┻')];
 });
 
-const flip = face(char('p'))(({ left, center, right, wrap }) => {
-    return [wrap([left(), '╯°', center('□'), '°', right()]), ' ╯︵ ┻━┻'];
-});
+
 
 //     // ヘ（°□。）ヘ   ヘ（。□°）ヘ
 
 const faces = choice([
     sad,
+    lod,
     lenny,
     shrug,
     cool,
@@ -196,13 +214,6 @@ const faces = choice([
     flip,
 ]);
 
-/*
-    Mood keymap
-    Negative - Angry
-    Neutral - Chaotic
-    Positive - Aroused
-
-*/
 
 // <> direction / arms
 // .o(..)
@@ -229,34 +240,23 @@ module.exports = { parser };
 */
 
 console.log(parser(`
-    *
-    f()
-    m(.-)
-    :shrug:
-    f'Dangle'
-    s()
-    c()
+    a() s() d() f()
+    z() x() c() v()
+
+    v(.-)
+    c($<3)
+    v()*** *!
+
+    h'hs' a'vaportext' ~~ \`2qlw\`
+
+    s(a*())
+
     c(s'w')
-    c(.o)
-    c() i'TODO: wand' <3
-    c($) KK
-    c(.~^).~
-    :egg:
+    c(.o$) **
+
+    f'Dangle'
 `))
 
-// console.log(script.run(`
-//     s'(owo)'
-//     K2A'dino'@x1f996
-//     egg
-//     \`asda\`
-//     \`\\\`\`
-//     .\`
-//     ~~\`
-//     .@
-//     <3
-//     @97
-// `).result)
-//
 /*
 TODO;
 
