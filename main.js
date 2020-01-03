@@ -103,7 +103,8 @@ const star = charmap('*', {
     '"': '✴',
     '£': '✯',
     '*': '★',
-    '$': '✿',
+    '$': '🗲',
+    '#': '✿',
     '+': '✧',
 });
 
@@ -156,6 +157,7 @@ const face = (ident) => (fn) => sequenceOf([
     const hideFace = (str) => (mods.includes('!') || pound) ? '' : str;
     const face = fn({
         name,
+        dir: /[A-Z]/.test(name),
         left: (def) => left == null ? hideFace(def) : left,
         eye: (str) => hideFace(str),
         center: (def) => center || hideFace(def),
@@ -167,11 +169,10 @@ const face = (ident) => (fn) => sequenceOf([
     return Array.isArray(face) ? face.join`` : face;
 });
 
-const cute = face(anyOfString('cC'))(({ name, left, right, center, wrap, eye }) => {
-    const direction = /[A-Z]/.test(name);
-    const eye_ = eye(direction ? '◔' : '◕');
-    const left_ = direction ? '✿' : undefined;
-    const right_ = direction ? undefined : '✿';
+const cute = face(anyOfString('cC'))(({ dir, left, right, center, wrap, eye }) => {
+    const eye_ = eye(dir ? '◔' : '◕');
+    const left_ = dir ? '✿' : undefined;
+    const right_ = dir ? undefined : '✿';
     return wrap([left(left_), eye_, center('◡'), eye_, right(right_)]);
 });
 
@@ -201,14 +202,28 @@ const lenny = face(char('v'))(({ left, center, right, wrap, eye }) => {
 
 
 const flip = face(char('f'))(({ left, center, right, wrap, obj, arm, eye }) => {
+    if (!dir) {
+        return [obj('┬──┬◡'), arm(''), wrap([
+            left(arm('╯')), eye('°'), center('□'), eye('°'), right()
+        ]), arm(' ╯'), '︵ ', obj('┻━┻')]
+    }
     return [wrap([
         left(arm('╯')), eye('°'), center('□'), eye('°'), right()
-    ]), arm(' ╯'), '︵ ', obj('┻━┻')];
+    ]), arm(' ╯'), '︵ ', obj('┻━┻')]
+});
+// ┬──┬◡ﾉ(° -°ﾉ)
+
+const dumb = face(anyOfString('qQ'))(({ dir, left, right, center, wrap, eye, arm }) => {
+    return [arm('ヘ '), wrap([
+        left(), eye('°。'[+dir]), center('□'), eye('。°'[+dir]), right()
+    ]), arm(' ヘ')];
 });
 
-
-
-//     // ヘ（°□。）ヘ   ヘ（。□°）ヘ
+const wizard = face(anyOfString('w'))(({ left, right, center, wrap, eye, arm, obj }) => {
+    return [wrap([
+        left(arm('∩')), eye('｀'), center('-'), eye('´'), right()
+    ]), arm('⊃'), '━☆ﾟ.*･｡ﾟ ', obj('')];
+});
 
 const faces = choice([
     sad,
@@ -219,14 +234,11 @@ const faces = choice([
     actually,
     cute,
     flip,
+    dumb,
+    wizard,
 ]);
 
 
-// <> direction / arms
-// .o(..)
-
-// https://www.vaporwavetextgenerator.com/
-// https://beautifuldingbats.com/aesthetic-text-generator/
 // http://kaomoji.ru/en/
 
 
@@ -246,17 +258,21 @@ module.exports = { parser };
     1e65 ﷽
 */
 
-console.log(parser(`
-    a() s() d() f()
-    z() x() c() v()
+const faceTest = ['qw', 'asdf', 'zxcv']
+    .map(d => '    ' + [...d].map(f=>`.${f}.: ${f}()`).join` `).join`\n`
+
+console.log(parser(`${faceTest}
 
     c($<3)
 
-    z"()
+    z()
+    z"(~~^)~~
     v(.-)
     v()*** *!
 
     h'hs' a'vaportext' ~~ \`2qlw\`
+
+
 
     s(a*())
 
@@ -279,6 +295,13 @@ TODO;
 (Ɔ ˘⌣˘) ~
 (◕‿◕)♡
 //(◕‿◕✿)
+//
+    happy: "(• ◡•)",
+    ayy: "☜(ﾟヮﾟ)☜",
+    love: "( ˘ ³˘)♥",
+    lenny2: "( ͡º ͜ʖ ͡º)",
+    wink: "( ͡~ ͜ʖ ͡°)",
+    notes: "♪♫",
 
 (◔◡◔)⊃━☆ﾟ.*･｡
 
