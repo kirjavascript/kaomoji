@@ -201,17 +201,16 @@ const lenny = face(char('v'))(({ left, center, right, wrap, eye }) => {
 });
 
 
-const flip = face(char('f'))(({ left, center, right, wrap, obj, arm, eye }) => {
-    if (!dir) {
-        return [obj('┬──┬◡'), arm(''), wrap([
-            left(arm('╯')), eye('°'), center('□'), eye('°'), right()
-        ]), arm(' ╯'), '︵ ', obj('┻━┻')]
+const flip = face(anyOfString('fF'))(({ dir, left, center, right, wrap, obj, arm, eye }) => {
+    if (dir) {
+        return [obj('┬──┬◡'), arm('ﾉ'), wrap([
+            left(), eye('° '), center('-'), eye('°'), right(arm('ﾉ'))
+        ])]
     }
     return [wrap([
         left(arm('╯')), eye('°'), center('□'), eye('°'), right()
     ]), arm(' ╯'), '︵ ', obj('┻━┻')]
 });
-// ┬──┬◡ﾉ(° -°ﾉ)
 
 const dumb = face(anyOfString('qQ'))(({ dir, left, right, center, wrap, eye, arm }) => {
     return [arm('ヘ '), wrap([
@@ -219,7 +218,7 @@ const dumb = face(anyOfString('qQ'))(({ dir, left, right, center, wrap, eye, arm
     ]), arm(' ヘ')];
 });
 
-const wizard = face(anyOfString('w'))(({ left, right, center, wrap, eye, arm, obj }) => {
+const wizard = face(char('w'))(({ left, right, center, wrap, eye, arm, obj }) => {
     return [wrap([
         left(arm('∩')), eye('｀'), center('-'), eye('´'), right()
     ]), arm('⊃'), '━☆ﾟ.*･｡ﾟ ', obj('')];
@@ -238,10 +237,6 @@ const faces = choice([
     wizard,
 ]);
 
-
-// http://kaomoji.ru/en/
-
-
 function parser(str) {
     const { result, index } = script.run(str);
     return str.length == index ? result : result + '// ' + str.slice(index);
@@ -249,6 +244,10 @@ function parser(str) {
 
 module.exports = { parser };
 
+// http://kaomoji.ru/en/
+//https://cutekaomoji.com
+
+// say() speech bubble
 
 /*
     qj λ
@@ -258,35 +257,7 @@ module.exports = { parser };
     1e65 ﷽
 */
 
-const faceTest = ['qw', 'asdf', 'zxcv']
-    .map(d => '    ' + [...d].map(f=>`.${f}.: ${f}()`).join` `).join`\n`
-
-console.log(parser(`${faceTest}
-
-    c($<3)
-
-    z()
-    z"(~~^)~~
-    v(.-)
-    v()*** *!
-
-    h'hs' a'vaportext' ~~ \`2qlw\`
-
-
-
-    s(a*())
-
-    f£(C())
-
-    f!(d()?f'Dangle')
-
-    c(s'w')
-    c(.o$) **
-`))
-
 /*
-TODO;
-
 ～
 (っ⌒‿⌒)っ~
 (✿◠‿◠)っ~
@@ -310,8 +281,6 @@ const faces = [ '(◕ᴗ◕✿)', '(◕◡◕✿)', '(◔◡◔✿)', '(｡◕�
 sparks
 wand
 qt
-
-convert normal smileys
 
 ‿◡ᴗ
 ︶ᵕ˘
