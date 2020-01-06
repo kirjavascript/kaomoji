@@ -76,6 +76,19 @@ const fliptext = delim('f', `'`).map(str => (
 
 const charset = (start, length) => Array.from({ length }, (_, i) => String.fromCodePoint(start + i)).join``;
 
+const zGroups = [ '̍̎̄̅̿̑̆̐͒͗͑̇̈̊͂̓̈́͊͋͌̃̂̌͐̀́̋̏̒̓̔̽̉ͣͤͥͦͧͨͩͪͫͬͭͮͯ̾͛͆̚', '̴̵̶̡̢̧̨̛̀́̕͘͏̸̷͜͟͢͝͞͠͡҉', '̖̗̘̙̜̝̞̟̠̤̥̦̩̪̫̬̭̮̯̰̱̲̳̹̺̻̼͇͈͉͍͎͓͔͕͖͙͚̣ͅ' ];
+
+const toZalgo = (str) => {
+    const r = v => 0|Math.random()*v;
+    const counts = [r(8) + 1, r(3), r(8) + 1];
+    return [...str].flatMap((ch) => (
+        [ch, ...zGroups.flatMap((charset, i) => [...Array(counts[i])].map(() => charset[r(charset.length - 1)]))]
+    )).join``;
+};
+
+
+console.log(toZalgo('test'));
+
 const textReplacement = choice([
     delim('t', "'"), // none
     convertText('i', italic),
@@ -85,6 +98,7 @@ const textReplacement = choice([
     convertText('a', aesthetic),
     convertText('h', charset(0x3041, 83)), // hiragana
     convertText('k', charset(0x4e00, 0x89a0)), // kanji
+    delim('z', "'").map(toZalgo),
     fliptext, // f
 ]);
 
@@ -246,6 +260,8 @@ module.exports = { parser };
 
 // http://kaomoji.ru/en/
 //https://cutekaomoji.com
+
+// hex 2 rgb, rgb to hex, eval()
 
 // say() speech bubble
 
