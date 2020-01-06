@@ -87,9 +87,6 @@ const toZalgo = (str) => {
     )).join``;
 };
 
-
-console.log(toZalgo('test'));
-
 const textReplacement = choice([
     delim('t', "'"), // none
     convertText('i', italic),
